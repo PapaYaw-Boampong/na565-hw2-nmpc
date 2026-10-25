@@ -1,0 +1,14 @@
+# Local environment / editor
+.venv/
+.vscode/
+
+# Personal reference copies of the original starter code
+original_templates/
+
+# Python / Jupyter caches
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
