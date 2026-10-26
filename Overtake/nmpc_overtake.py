@@ -45,10 +45,12 @@ def nmpc_controller():
 
     # Define the cost function (objective) components
     # These encourage the car to stay in its lane, follow the leader, and achieve desired speed
-    # Running cost keeps a light lane weight so the car is free to pull out and pass,
-    # while the terminal cost strongly pulls it back to y = 0 with zero yaw at v_des.
-    P = 10. * x_model[1]**2 + 1000. * x_model[2]**2 + 100. * (x_model[3] - v_des)**2
-    L = 0.01 * x_model[1]**2 + 1. * x_model[2]**2 + 10. * (x_model[3] - v_des)**2 \
+    # Lateral reference: y = 0 (leader's lane) when far from the leader, and the passing lane
+    # (y = 2.5) while alongside it (-45 < x < 35). Passing on the right is impossible (y >= -1
+    # is inside the ellipse), so this keeps the solver from getting stuck behind the leader.
+    y_ref = 2.5 * 0.5 * (ca.tanh((x_model[0] + 45.) / 5.) - ca.tanh((x_model[0] - 35.) / 5.))
+    P = 10. * (x_model[1] - y_ref)**2 + 1000. * x_model[2]**2 + 100. * (x_model[3] - v_des)**2
+    L = 3. * (x_model[1] - y_ref)**2 + 1. * x_model[2]**2 + 10. * (x_model[3] - v_des)**2 \
         + 0.01 * u_model[0]**2 + 1. * u_model[1]**2
 
     Func_cost_terminal = ca.Function('P', [x_model, params], [P])
